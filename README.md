@@ -22,15 +22,15 @@ ValTree stores files with any file extension, though `.txt` is encouraged. Here 
 			d  1
 			e  2.01
 			f  something
-	g
+	g-is-long
 		h  h is a cool letter
 		i
 	j  1.618
-	k  too
+	k-is-longer  too
 
 Tabs or spaces can be used to indent the data. Each tab or space puts the current line of data as a child of the previous line, depending on depth.
 
-Data is stored as key value pairs. After the initial tabs or spaces comes the key, then as many tabs or spaces as desired, then the value. The value is everything remaining on the current line after the key and whitespace. (Note that values can contain whitespace.)
+Data is stored as key value pairs. After the initial tabs or spaces comes the key, then as many tabs or spaces as desired, then the value. The key can be any non-whitespace character. The value is everything remaining on the current line after the key and some whitespace. (Note that values can contain whitespace.)
 
 Values can be strings, integers or floats. When parsing, ValTree reads the value as a string, then also converts it to `long` and `double` using `strtol` and `strtod`. All three types of data are stored simultaneously as separate data members for quick access.
 
