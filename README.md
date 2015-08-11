@@ -32,7 +32,7 @@ Tabs or spaces can be used to indent the data. Each tab or space puts the curren
 
 Data is stored as key value pairs. After the initial tabs or spaces comes the key, then as many tabs or spaces as desired, then the value. The key can be any non-whitespace character. The value is everything remaining on the current line after the key and some whitespace. (Note that values can contain whitespace.)
 
-Values can be strings, integers or floats. When parsing, ValTree reads the value as a string, then also converts it to `long` and `double` using `strtol` and `strtod`. All three types of data are stored simultaneously as separate data members for quick access.
+Values can be strings, integers or floats. When parsing, `ValTree` reads the value as a string, then also converts it to `long` and `double` using `strtol` and `strtod`. All three types of data are stored simultaneously as separate data members for quick access.
 
 Each `ValTree` is a self-contained recursive class containing siblings and children. Children are `ValTree` objects stored at one level deeper than current. Siblings are `ValTree` objects stored at the same depth level. Parsing a `ValTree` puts all siblings inside the first `ValTree` object for convenience.
 
@@ -47,7 +47,7 @@ Here is some example code to load a ValTree, retrieve a value, store a new value
 	v.parse("Example.txt");
 	
 	// retrieve a value
-	auto& h = v.getSibling("g").getChild("h");
+	auto& h = v.getSibling("g-is-long").getChild("h");
 	cout << "The value of 'h' is " << h.getStr() << endl;
 	
 	// store a new value
