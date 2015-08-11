@@ -3,6 +3,7 @@
 //
 
 #include "ValTree.h"
+#include <iostream>
 #include <fstream>
 
 using namespace std;
@@ -416,7 +417,7 @@ void ValTree::log()
 {
 	stringstream ss;
 	_log(ss, *this, 0);
-	Log("%s", ss.str().c_str());
+	cout << ss.str() << endl;
 }
 
 
