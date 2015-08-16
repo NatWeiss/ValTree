@@ -31,7 +31,7 @@ class ValTree
 		/// Getters.
 		const std::string& getKey() const;
 		const std::string& getStr() const;
-		int getInt() const;
+		long getInt() const;
 		double getFloat() const;
 	
 		/// Set the key and value.
@@ -79,6 +79,9 @@ class ValTree
 
 		/// Parse the given file into this ValTree object.
 		bool parse(const std::string& filename);
+
+		/// Parse the given data string into this ValTree object.
+		bool parseData(const std::string& data);
 	
 		/// Save this ValTree object into the given file.
 		bool save(const std::string& filename);

@@ -5,6 +5,7 @@
 #include "ValTree.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -147,7 +148,7 @@ const string& ValTree::getStr() const
 	return val;
 }
 
-int ValTree::getInt() const
+long ValTree::getInt() const
 {
 	return valInt;
 }
@@ -223,7 +224,7 @@ const ValTree& ValTree::getSibling(const string& k) const
 
 int ValTree::size() const
 {
-	return (this->isNull() ? 0 : 1) + siblings.size();
+	return (this->isNull() ? 0 : 1) + (int)siblings.size();
 }
 
 ValTree& ValTree::getIndex(int index)
@@ -377,7 +378,26 @@ bool ValTree::parse(const string& filename)
 {
 	this->clear();
 
-	auto data = FileUtils::getInstance()->getStringFromFile(filename);
+	string data;
+	ifstream file(filename);
+	if (file.is_open())
+	{
+		file.seekg(0, std::ios::end);
+		auto size = file.tellg();
+		data.resize(size, ' ');
+		file.seekg(0);
+		file.read(&data[0], size);
+	}
+	if (data.size() <= 0)
+		return false;
+
+	return this->parseData(data);
+}
+
+bool ValTree::parseData(const string& data)
+{
+	this->clear();
+
 	if (data.size() <= 0)
 		return false;
 
