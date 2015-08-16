@@ -14,7 +14,7 @@ ValTree solves these two issues by making it more simple to type / create files 
 Ports to Other Languages
 ------------------------
 
-* (C# port)[https://github.com/wackoisgod/ValTreeCSharp] -- thanks to (wackoisgod)[https://github.com/wackoisgod]
+* [C# port](https://github.com/wackoisgod/ValTreeCSharp) -- thanks to [wackoisgod](https://github.com/wackoisgod)
 
 
 Example File
