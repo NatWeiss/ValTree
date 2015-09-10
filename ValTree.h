@@ -99,7 +99,7 @@ class ValTree
 			public:
 				Iterator(const ValTree& tree, int index);
 				const ValTree& operator*();
-				Iterator& operator++();
+				Iterator& operator++(); // note this is pre-increment only (ie. ++it)
 				bool operator!=(const Iterator& rhs);
 		};
 	

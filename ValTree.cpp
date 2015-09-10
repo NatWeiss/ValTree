@@ -7,6 +7,8 @@
 #include <fstream>
 #include <sstream>
 
+const int kMaxFileSize = 8 * 1024 * 1024;
+
 using namespace std;
 
 //
@@ -62,6 +64,9 @@ static void _log(ostream& ss, const ValTree& v, int depth)
 	for (auto& sibling : v)
 		if (i++ > 0)
 			_log(ss, sibling, depth);
+
+	// note that a c++98 for loop is not any faster for saving large files
+	//for (auto it = v.begin(), end = v.end(); it != end; ++it)
 }
 
 #pragma mark -
@@ -357,6 +362,9 @@ int ValTree::getDepth(const string& data, int pos)
 
 bool ValTree::parse(const string& data, int& pos, bool firstSibling)
 {
+	if (pos > kMaxFileSize)
+		return false;
+
 	// get depth
 	int depth = this->getDepth(data, pos);
 	if (depth < 0)
@@ -440,6 +448,8 @@ bool ValTree::parseData(const string& data)
 
 	int pos = 0;
 	this->parse(data, pos, true);
+	if (pos > kMaxFileSize)
+		cout << "*** WARNING: ValTree parse truncated due to exceeding maximum file size" << endl;
 	return true;
 }
 
