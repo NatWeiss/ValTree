@@ -413,8 +413,7 @@ static void _log(ostream& ss, const ValTree& v, int depth)
 	ss << v.getKey() << "  " << v.getStr() << endl;
 	
 	if (v.hasChildren())
-		for (auto& child : v.getFirstChild())
-			_log(ss, child, depth + 1);
+		_log(ss, v.getFirstChild(), depth + 1);
 	int i = 0;
 	for (auto& sibling : v)
 		if (i++ > 0)
