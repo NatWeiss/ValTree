@@ -388,9 +388,9 @@ bool ValTree::parse(const string& data, int& pos, bool firstSibling)
 	// parse children
 	if (childDepth > depth)
 	{
-		ValTree v;
-		if (v.parse(data, pos, true))
-			children.push_back(v);
+		children.push_back(ValTree());
+		if (!children.back().parse(data, pos, true))
+			children.pop_back();
 		childDepth = this->getDepth(data, pos);
 	}
 	
@@ -400,10 +400,10 @@ bool ValTree::parse(const string& data, int& pos, bool firstSibling)
 		bool success = true;
 		while (success && childDepth == depth)
 		{
-			ValTree v;
-			success = v.parse(data, pos, false);
-			if (success)
-				siblings.push_back(v);
+			siblings.push_back(ValTree());
+			success = siblings.back().parse(data, pos, false);
+			if (!success)
+				siblings.pop_back();
 			childDepth = this->getDepth(data, pos);
 		}
 		return siblings.size() > 0;
