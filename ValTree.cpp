@@ -9,6 +9,68 @@
 
 using namespace std;
 
+//
+// static helper functions
+//
+
+static bool isWhitespace(char c)
+{
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+}
+
+static int findWhitespace(const string& s, int start)
+{
+	int i = start;
+	for (; i < s.size() && !isWhitespace(s[i]); i++)
+		;
+	return i;
+}
+
+static int findNonWhitespace(const string& s, int start)
+{
+	int i = start;
+	for (; i < s.size() && isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
+		;
+	return i;
+}
+
+static int findNewline(const string& s, int start)
+{
+	int i = start;
+	for (; i < s.size() && s[i] != '\n' && s[i] != '\r'; i++)
+		;
+	return i;
+}
+
+static int findAfterNewline(const string& s, int start)
+{
+	int i = findNewline(s, start);
+	for (; i < s.size() && (s[i] == '\n' || s[i] == '\r'); i++)
+		;
+	return i;
+}
+
+static void _log(ostream& ss, const ValTree& v, int depth)
+{
+	for (int i = 0; i < depth; i++)
+		ss << "\t";
+	ss << v.getKey() << "  " << v.getStr() << endl;
+	
+	if (v.hasChildren())
+		_log(ss, v.getFirstChild(), depth + 1);
+	int i = 0;
+	for (auto& sibling : v)
+		if (i++ > 0)
+			_log(ss, sibling, depth);
+}
+
+#pragma mark -
+#pragma mark ValTree
+
+//
+// ValTree
+//
+
 ValTree::ValTree()
 {
 	valInt = 0;
@@ -69,6 +131,9 @@ void ValTree::set(const string& k, const string& v)
 	this->setValInt();
 	this->setValFloat();
 }
+
+#pragma mark -
+#pragma mark Operators
 
 ValTree& ValTree::operator=(const ValTree& rhs)
 {
@@ -137,6 +202,9 @@ bool ValTree::operator>(const ValTree& rhs)
 {
 	return val > rhs.val;
 }
+
+#pragma mark -
+#pragma mark Keys and Values
 
 const string& ValTree::getKey() const
 {
@@ -241,6 +309,9 @@ const ValTree& ValTree::getIndex(int index) const
 	return *this;
 }
 
+#pragma mark -
+#pragma mark Iteration
+
 ValTree::Iterator::Iterator(const ValTree& v, int i) : index(i), tree(v)
 {
 }
@@ -273,42 +344,8 @@ ValTree::Iterator ValTree::end() const
 	return Iterator(*this, this->size());
 }
 
-static bool isWhitespace(char c)
-{
-	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
-}
-
-static int findWhitespace(const string& s, int start)
-{
-	int i = start;
-	for (; i < s.size() && !isWhitespace(s[i]); i++)
-		;
-	return i;
-}
-
-static int findNonWhitespace(const string& s, int start)
-{
-	int i = start;
-	for (; i < s.size() && isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
-		;
-	return i;
-}
-
-static int findNewline(const string& s, int start)
-{
-	int i = start;
-	for (; i < s.size() && s[i] != '\n' && s[i] != '\r'; i++)
-		;
-	return i;
-}
-
-static int findAfterNewline(const string& s, int start)
-{
-	int i = findNewline(s, start);
-	for (; i < s.size() && (s[i] == '\n' || s[i] == '\r'); i++)
-		;
-	return i;
-}
+#pragma mark -
+#pragma mark Parsing
 
 int ValTree::getDepth(const string& data, int pos)
 {
@@ -404,20 +441,6 @@ bool ValTree::parseData(const string& data)
 	int pos = 0;
 	this->parse(data, pos, true);
 	return true;
-}
-
-static void _log(ostream& ss, const ValTree& v, int depth)
-{
-	for (int i = 0; i < depth; i++)
-		ss << "\t";
-	ss << v.getKey() << "  " << v.getStr() << endl;
-	
-	if (v.hasChildren())
-		_log(ss, v.getFirstChild(), depth + 1);
-	int i = 0;
-	for (auto& sibling : v)
-		if (i++ > 0)
-			_log(ss, sibling, depth);
 }
 
 bool ValTree::save(const string& filename)
