@@ -54,9 +54,12 @@ static int findAfterNewline(const string& s, int start)
 
 static void _log(ostream& ss, const ValTree& v, int depth)
 {
-	for (int i = 0; i < depth; i++)
-		ss << "\t";
-	ss << v.getKey() << "  " << v.getStr() << endl;
+	if (!v.isNull())
+	{
+		for (int i = 0; i < depth; i++)
+			ss << "\t";
+		ss << v.getKey() << "  " << v.getStr() << endl;
+	}
 	
 	if (v.hasChildren())
 		_log(ss, v.getFirstChild(), depth + 1);
@@ -374,9 +377,12 @@ bool ValTree::parse(const string& data, int& pos, bool firstSibling)
 	
 	// key is first word
 	int startPos = pos + depth;
-	pos = findWhitespace(data, pos + depth + 1);
-	key = data.substr(startPos, pos < data.size() ? pos - startPos : string::npos);
-	
+	if (startPos < nextPos)
+	{
+		pos = findWhitespace(data, pos + depth + 1);
+		key = data.substr(startPos, pos < data.size() ? pos - startPos : string::npos);
+	}
+
 	// val is remainder
 	if (key.size() > 0)
 	{
