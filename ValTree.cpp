@@ -7,7 +7,8 @@
 #include <fstream>
 #include <sstream>
 
-const int kMaxFileSize = 8 * 1024 * 1024;
+const int  kMaxFileSize      = 8 * 1024 * 1024;
+const char kCommentBeginChar = '#';
 
 using namespace std;
 
@@ -386,13 +387,22 @@ bool ValTree::parse(const string& data, int& pos, bool firstSibling)
 	// val is remainder
 	if (key.size() > 0)
 	{
-		pos = findNonWhitespace(data, pos);
-		int end = findNewline(data, pos);
-		if (pos < data.size() && end > pos)
+		if (key[0] == kCommentBeginChar)
+    		{
+			// This is a comment, so we can skip the line
+			// Resetting the key will do the trick
+			key = "";
+		}
+		else
 		{
-			val = data.substr(pos, end - pos);
-			this->setValInt();
-			this->setValFloat();
+			pos = findNonWhitespace(data, pos);
+			int end = findNewline(data, pos);
+			if (pos < data.size() && end > pos)
+			{
+				val = data.substr(pos, end - pos);
+				this->setValInt();
+				this->setValFloat();
+			}
 		}
 	}
 
