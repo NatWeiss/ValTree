@@ -67,16 +67,9 @@ class ValTree
 		ValTree& getChild(const std::string& key);
 		const ValTree& getChild(const std::string& key) const;
 	
-		/// Return a sibling object given a key (returns a static null ValTree if no children).
-		ValTree& getSibling(const std::string& key);
-		const ValTree& getSibling(const std::string& key) const;
-	
 		/// Add a child to the current ValTree.
 		void addChild(const ValTree& v);
 	
-		/// Add a sibling to the current ValTree.
-		void addSibling(const ValTree& v);
-
 		/// Parse the given file into this ValTree object.
 		bool parse(const std::string& filename);
 
@@ -113,14 +106,13 @@ class ValTree
 		long valInt;
 		double valFloat;
 		std::vector<ValTree> children;
-		std::vector<ValTree> siblings;
-	
+
 		void setValInt();
 		void setValFloat();
 		static ValTree& null();
 	
 		int getDepth(const std::string& data, int pos);
-		bool parse(const std::string& data, int& pos, bool firstSibling);
+		bool parse(const std::string& data, int& pos, int currentDepth);
 };
 
 
