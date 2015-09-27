@@ -53,11 +53,15 @@ Here is some example code to load a ValTree, retrieve a value, store a new value
 	v.parse("Example.txt");
 	
 	// retrieve a value
-	auto& h = v.getSibling("g-is-long").getChild("h");
+	auto& h = v.getChild("g-is-long").getChild("h");
 	cout << "The value of 'h' is " << h.getStr() << endl;
 	
+	// query the tree
+	auto& key41 = v.query("key1.key2.key3.key4-1");
+	cout << "The value of 'key1.key2.key3.key4-1' is '" << key41.getStr() << "'" << endl;
+
 	// store a new value
-	v.addSibling(ValTree("l", "90,90"));
+	v.addChild(ValTree("l", "90,90"));
 	
 	// save the tree to a new file
 	v.save("Example-modified.txt");
@@ -65,8 +69,7 @@ Here is some example code to load a ValTree, retrieve a value, store a new value
 To Do
 -----
 
-1. Add the ability to comment.
-2. Add the ability to get siblings as a vector.
+1. Add the ability to get siblings as a vector.
 
 License
 -------
