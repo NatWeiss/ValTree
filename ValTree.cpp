@@ -93,6 +93,33 @@ static void _log(ostream& ss, const ValTree& v, int depth)
 	//for (auto it = v.begin(), end = v.end(); it != end; ++it)
 }
 
+// Split a string using a char as delimiter
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+  std::vector<std::string> elems;
+  split(s, delim, elems);
+  return elems;
+}
+
+std::string join(const std::vector<std::string> pieces, char delim) {
+  stringstream ss;
+  if (pieces.size()) {
+    ss << pieces[0];
+    for (int i = 1; i < pieces.size(); i++) {
+      ss << delim << pieces[i];
+    }
+  }
+  return ss.str();
+}
+
 #pragma mark -
 #pragma mark ValTree
 
@@ -308,6 +335,34 @@ const ValTree& ValTree::getIndex(int index) const
 {
   if (index >= 0 && index < children.size())
     return children[index];
+  return null();
+}
+
+ValTree& ValTree::query(const std::string &query) {
+  auto keys = split(query, '.');
+  if (keys.size()) {
+    string key = keys[0];
+    if (keys.size() > 1) {
+      keys.erase(std::find(keys.begin(), keys.end(), key));
+      return getChild(key).query(join(keys, '.'));
+    } else {
+      return getChild(key);
+    }
+  }
+  return null();
+}
+
+const ValTree& ValTree::query(const std::string &query) const {
+  auto keys = split(query, '.');
+  if (keys.size()) {
+    string key = keys[0];
+    if (keys.size() > 1) {
+      keys.erase(std::find(keys.begin(), keys.end(), key));
+      return getChild(key).query(join(keys, '.'));
+    } else {
+      return getChild(key);
+    }
+  }
   return null();
 }
 
