@@ -552,7 +552,7 @@ bool ValTree::save(const string& filename)
 	ofstream file(filename);
 	if (file.is_open())
 	{
-		_log(file, *this, 0);
+		_log(file, *this, -1);
 		file.close();
 		return true;
 	}
