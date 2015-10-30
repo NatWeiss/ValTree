@@ -67,12 +67,15 @@ class ValTree
 		ValTree& getChild(const std::string& key);
 		const ValTree& getChild(const std::string& key) const;
 
-		/// Return a child object using a dot-separated query string to navigate the tree
+		/// Return a child object using a dot-separated query string to navigate the tree.
 		ValTree& query(const std::string& query);
 		const ValTree& query(const std::string& query) const;
 
 		/// Add a child to the current ValTree.
 		void addChild(const ValTree& v);
+
+		/// Add all necessary branches to val.
+		void addTree(const std::string& query, const std::string& val);
 	
 		/// Parse the given file into this ValTree object.
 		bool parse(const std::string& filename);

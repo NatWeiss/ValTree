@@ -37,7 +37,12 @@ int main(int argc, const char* argv[])
 
 	// store a new value
 	v.addChild(ValTree("l", "90,90"));
-	cout << "After adding sibling 'l', new ValTree looks like this:" << endl;
+	cout << "After adding child 'l', new ValTree looks like this:" << endl;
+	v.log();
+
+	// store a new value at depth
+	v.addTree("l.m.n.o.p", "q");
+	cout << "After adding tree 'l.m.n.o.p', new ValTree looks like this:" << endl;
 	v.log();
 	
 	// save the tree to a new file

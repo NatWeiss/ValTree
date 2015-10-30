@@ -341,6 +341,33 @@ const ValTree& ValTree::query(const string& query) const
 	return this->query(v);
 }
 
+void ValTree::addTree(const string& query, const std::string& _val)
+{
+	auto pos = query.find('.');
+	if (pos == string::npos)
+	{
+		this->addChild(ValTree(query, _val));
+		return;
+	}
+
+	auto k = query.substr(0, pos);
+	auto subquery = query.substr(pos + 1);
+	if (k.size() > 0)
+	{
+		auto& child = this->getChild(k);
+		if (child.isNull())
+		{
+			ValTree v(k, string());
+			v.addTree(subquery, _val);
+			this->addChild(v);
+		}
+		else
+		{
+			child.addTree(subquery, _val);
+		}
+	}
+}
+
 #pragma mark -
 #pragma mark Iteration
 
