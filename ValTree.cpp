@@ -75,9 +75,17 @@ static int findCommentOrNewline(const string& s, int start)
 	return i;
 }
 
+static int getDepth(const string& data, int pos)
+{
+	for (int i = pos; i < data.size(); i++)
+		if (!isWhitespace(data[i]))
+			return i - pos;
+	return -1;
+}
+
 static void _log(ostream& ss, const ValTree& v, int depth)
 {
-	if (!v.isNull())
+	if (v.getKey().size() > 0 || v.getStr().size() > 0)
 	{
 		for (int i = 0; i < depth; i++)
 			ss << "\t";
@@ -406,118 +414,64 @@ ValTree::Iterator ValTree::end() const
 #pragma mark -
 #pragma mark Parsing
 
-int ValTree::getDepth(const string& data, int pos)
+bool ValTree::parse(const string& data, int& pos, int lastDepth)
 {
-	for (int i = pos; i < data.size(); i++)
-		if (!isWhitespace(data[i]))
-			return i - pos;
-	return -1;
-}
-
-bool ValTree::parse(const string& data, int& pos, int currentDepth)
-{
-	int lineEnd = findNewline(data, pos);
 	int nextLineStart = findAfterNewline(data, pos);
-
 	if (nextLineStart > kMaxFileSize)
 		return false;
 
-	// pait<int, ValTree> collects a ValTree with its current depth
-	vector<pair<int,ValTree*>> tree;
-
-	// while we still have lines ...
-	do
+	// comment here so jump this line
+	if (findCommentOrNewline(data, pos) <= findNonWhitespace(data, pos))
 	{
-		// Verify if is a full-line comment
-		int commentStart = findCommentOrNewline(data, pos);
-		int firstCharPos = findNonWhitespace(data, pos);
-		if (commentStart <= firstCharPos)
-		{
-			// Comment here so jump this line
-			pos = nextLineStart;
-		}
+		pos = nextLineStart;
+		return this->parse(data, pos, lastDepth);
+	}
 
+	// parse this child
+	int depth = getDepth(data, pos);
+	if (depth == lastDepth)
+	{
 		// key is first word
-		int depth = this->getDepth(data, pos);
 		int startPos = pos + depth;
-		string _key;
 		if (startPos < nextLineStart)
 		{
 			pos = findWhitespace(data, pos + depth + 1);
-			_key = data.substr(startPos, pos < data.size() ? pos - startPos : string::npos);
+			key = data.substr(startPos, pos < data.size() ? pos - startPos : string::npos);
 		}
 
 		// val is remainder
-		if (_key.size() > 0)
+		if (key.size() > 0)
 		{
-			ValTree* newObj = new ValTree;
-			newObj->key = _key;
-
 			pos = findNonWhitespace(data, pos);
-			// Trim the remainder if we find a comment
 			int end = findCommentOrNewline(data, pos);
-
 			if (pos < data.size() && end > pos)
 			{
-				newObj->val = data.substr(pos, end - pos);
-				newObj->setValInt();
-				newObj->setValFloat();
+				val = data.substr(pos, end - pos);
+				this->setValInt();
+				this->setValFloat();
 			}
-
-			tree.push_back({depth, newObj});
 		}
 
 		pos = nextLineStart;
-		lineEnd = findNewline(data, pos);
-		nextLineStart = findAfterNewline(data, pos);
-	} while (pos != lineEnd && lineEnd < kMaxFileSize);
+		depth = getDepth(data, pos);
+	}
 
-	// Associate each read line to create the actual tree
-	stack<pair<int, ValTree*>> cursor;
-	cursor.push({-1,this});
-
-	for (auto& _pair : tree)
+	// parse children
+	if (depth > lastDepth)
 	{
-		auto& valDepth = _pair.first;
-		if (valDepth < 0)
-			continue;
-		auto& v = _pair.second;
-
+		bool success = true;
+		lastDepth = depth;
 		do
 		{
-			auto& temp = cursor.top();
-			auto& depth = temp.first;
-			auto& parent = temp.second;
-
-			if (valDepth > depth)
-			{
-				cursor.push({valDepth, v});
-				break;
-			}
-			else if (valDepth == depth)
-			{
-				cursor.pop();
-				cursor.top().second->children.push_back(*parent);
-				cursor.push({valDepth, v});
-				break;
-			}
-			else
-			{
-				cursor.pop();
-				cursor.top().second->children.push_back(*parent);
-			}
-		} while (cursor.size());
+			children.push_back(ValTree());
+			success = children.back().parse(data, pos, depth);
+			if (!success)
+				children.pop_back();
+			depth = getDepth(data, pos);
+		} while (success && depth == lastDepth);
 	}
 
-	// Append remaining objects to the main tree
-	while (cursor.size() > 1)
-	{
-		auto top = cursor.top();
-		cursor.pop();
-		cursor.top().second->children.push_back(*top.second);
-	}
-
-	return true;
+	return !this->isNull();
 }
 
 bool ValTree::parse(const string& filename)
@@ -548,7 +502,7 @@ bool ValTree::parseData(const string& data)
 		return false;
 
 	int pos = 0;
-	this->parse(data, pos, true);
+	this->parse(data, pos, -1);
 	if (pos > kMaxFileSize)
 		cout << "*** WARNING: ValTree parse truncated due to exceeding maximum file size" << endl;
 	return true;

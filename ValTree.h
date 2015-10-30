@@ -118,8 +118,7 @@ class ValTree
 		void setValFloat();
 		static ValTree& null();
 	
-		int getDepth(const std::string& data, int pos);
-		bool parse(const std::string& data, int& pos, int currentDepth);
+		bool parse(const std::string& data, int& pos, int lastDepth);
 };
 
 
