@@ -66,11 +66,11 @@ class ValTree
 		/// Return a child object given a key (returns a static null ValTree if no children).
 		ValTree& getChild(const std::string& key);
 		const ValTree& getChild(const std::string& key) const;
-  
-    /// Return a child object using a dot-separated query string to navigate the tree
-    ValTree& query(const std::string& query);
+
+		/// Return a child object using a dot-separated query string to navigate the tree
+		ValTree& query(const std::string& query);
 		const ValTree& query(const std::string& query) const;
-	
+
 		/// Add a child to the current ValTree.
 		void addChild(const ValTree& v);
 	
