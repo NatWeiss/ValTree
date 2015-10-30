@@ -1,11 +1,24 @@
+// The ValTree will begin immediately after this line:
+key1 val1 // This comment should be ignored
+  key2 test
+    key3 9
+      key4 17.8
+        key5 1
+        key6 45
+      key4-1 test
+        lollo gege
+  key2-2 gwrhhn rhehe heth
+    key3-1 6
+      // Please ignore me :)
+   // Misaligned comments should not break the parsing
 a
-	b
-		c
-		d  1
-		e  2.01
-		f  something
+  b
+    c
+      d  1
+      e  2.01
+      f  something
 g-is-long
-	h  h is a cool letter
-	i
+  h  h is a cool letter
+  i
 j  1.618
 k-is-longer  too

@@ -13,11 +13,15 @@ int main(int argc, const char* argv[])
 	cout << filename << " loaded " << (v.isNull() ? "un" : "") << "successfully" << endl;
 	
 	// retrieve a value
-	auto& h = v.getSibling("g-is-long").getChild("h");
+	auto& h = v.getChild("g-is-long").getChild("h");
 	cout << "The value of 'g-is-long.h' is '" << h.getStr() << "'" << endl;
+  
+  // query the tree
+  auto& key41 = v.query("key1.key2.key3.key4-1");
+  cout << "The value of 'key1.key2.key3.key4-1' is '" << key41.getStr() << "'" << endl;
 	
 	// store a new value
-	v.addSibling(ValTree("l", "90,90"));
+	v.addChild(ValTree("l", "90,90"));
 	cout << "After adding sibling 'l', new ValTree looks like this:" << endl;
 	v.log();
 	

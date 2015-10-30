@@ -6,8 +6,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <stack>
 
-const int kMaxFileSize = 8 * 1024 * 1024;
+const int   kMaxFileSize      = 8 * 1024 * 1024;
+const char* kCommentStartTag  = "//";
 
 using namespace std;
 
@@ -52,6 +54,27 @@ static int findAfterNewline(const string& s, int start)
 	return i;
 }
 
+static int findCommentOrNewline(const string& s, int start)
+{
+  int i = start;
+  int nl = findNewline(s, start);
+  int commentIndex = 0;
+  static const int commentTagSize = (int)strlen(kCommentStartTag);
+  
+  while (i < nl) {
+    if (s[i++] == kCommentStartTag[commentIndex++])
+    {
+      if (commentIndex == commentTagSize)
+        return i - commentTagSize;
+    }
+    else
+      commentIndex = 0;
+  }
+  
+  return i;
+}
+
+
 static void _log(ostream& ss, const ValTree& v, int depth)
 {
 	if (!v.isNull())
@@ -60,16 +83,41 @@ static void _log(ostream& ss, const ValTree& v, int depth)
 			ss << "\t";
 		ss << v.getKey() << "  " << v.getStr() << endl;
 	}
+  
+  for (int i = 0; i < v.size(); i++) {
+    auto child = v.getIndex(i);
+    _log(ss, child, depth + 1);
+  }
 	
-	if (v.hasChildren())
-		_log(ss, v.getFirstChild(), depth + 1);
-	int i = 0;
-	for (auto& sibling : v)
-		if (i++ > 0)
-			_log(ss, sibling, depth);
-
 	// note that a c++98 for loop is not any faster for saving large files
 	//for (auto it = v.begin(), end = v.end(); it != end; ++it)
+}
+
+// Split a string using a char as delimiter
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+  std::vector<std::string> elems;
+  split(s, delim, elems);
+  return elems;
+}
+
+std::string join(const std::vector<std::string> pieces, char delim) {
+  stringstream ss;
+  if (pieces.size()) {
+    ss << pieces[0];
+    for (int i = 1; i < pieces.size(); i++) {
+      ss << delim << pieces[i];
+    }
+  }
+  return ss.str();
 }
 
 #pragma mark -
@@ -106,12 +154,11 @@ void ValTree::clear()
 	valInt = 0;
 	valFloat = 0.0;
 	children.clear();
-	siblings.clear();
 }
 
 bool ValTree::isNull() const
 {
-	return (key.size() <= 0 && val.size() <= 0);
+	return (key.size() <= 0 && val.size() <= 0 && children.size() == 0);
 }
 
 void ValTree::setValInt()
@@ -150,7 +197,6 @@ ValTree& ValTree::operator=(const ValTree& rhs)
 	valInt = rhs.valInt;
 	valFloat = rhs.valFloat;
 	children = rhs.children;
-	siblings = rhs.siblings;
 	return *this;
 }
 
@@ -239,11 +285,6 @@ void ValTree::addChild(const ValTree& v)
 	children.push_back(v);
 }
 
-void ValTree::addSibling(const ValTree& v)
-{
-	siblings.push_back(v);
-}
-
 bool ValTree::hasChildren() const
 {
 	return children.size() > 0;
@@ -278,43 +319,51 @@ const ValTree& ValTree::getChild(const string& k) const
 	return ValTree::null();
 }
 
-ValTree& ValTree::getSibling(const string& k)
-{
-	if (key == k)
-		return *this;
-	for (auto& v : siblings)
-		if (v.key == k)
-			return v;
-	return ValTree::null();
-}
-
-const ValTree& ValTree::getSibling(const string& k) const
-{
-	if (key == k)
-		return *this;
-	for (auto& v : siblings)
-		if (v.key == k)
-			return v;
-	return ValTree::null();
-}
-
 int ValTree::size() const
 {
-	return (this->isNull() ? 0 : 1) + (int)siblings.size();
+  return (int)children.size();
 }
 
 ValTree& ValTree::getIndex(int index)
 {
-	if (index > 0 && index - 1 < siblings.size())
-		return siblings[index - 1];
-	return *this;
+	if (index >= 0 && index < children.size())
+    return children[index];
+  return null();
 }
 
 const ValTree& ValTree::getIndex(int index) const
 {
-	if (index > 0 && index - 1 < siblings.size())
-		return siblings[index - 1];
-	return *this;
+  if (index >= 0 && index < children.size())
+    return children[index];
+  return null();
+}
+
+ValTree& ValTree::query(const std::string &query) {
+  auto keys = split(query, '.');
+  if (keys.size()) {
+    string key = keys[0];
+    if (keys.size() > 1) {
+      keys.erase(std::find(keys.begin(), keys.end(), key));
+      return getChild(key).query(join(keys, '.'));
+    } else {
+      return getChild(key);
+    }
+  }
+  return null();
+}
+
+const ValTree& ValTree::query(const std::string &query) const {
+  auto keys = split(query, '.');
+  if (keys.size()) {
+    string key = keys[0];
+    if (keys.size() > 1) {
+      keys.erase(std::find(keys.begin(), keys.end(), key));
+      return getChild(key).query(join(keys, '.'));
+    } else {
+      return getChild(key);
+    }
+  }
+  return null();
 }
 
 #pragma mark -
@@ -363,66 +412,105 @@ int ValTree::getDepth(const string& data, int pos)
 	return -1;
 }
 
-bool ValTree::parse(const string& data, int& pos, bool firstSibling)
+bool ValTree::parse(const string& data, int& pos, int currentDepth)
 {
-	if (pos > kMaxFileSize)
-		return false;
-
-	// get depth
-	int depth = this->getDepth(data, pos);
-	if (depth < 0)
-		return false;
-	int nextPos = findAfterNewline(data, pos);
-	int childDepth = this->getDepth(data, nextPos);
-	
-	// key is first word
-	int startPos = pos + depth;
-	if (startPos < nextPos)
-	{
-		pos = findWhitespace(data, pos + depth + 1);
-		key = data.substr(startPos, pos < data.size() ? pos - startPos : string::npos);
-	}
-
-	// val is remainder
-	if (key.size() > 0)
-	{
-		pos = findNonWhitespace(data, pos);
-		int end = findNewline(data, pos);
-		if (pos < data.size() && end > pos)
-		{
-			val = data.substr(pos, end - pos);
-			this->setValInt();
-			this->setValFloat();
-		}
-	}
-
-	// cue up next line
-	pos = nextPos;
-
-	// parse children
-	if (childDepth > depth)
-	{
-		children.push_back(ValTree());
-		if (!children.back().parse(data, pos, true))
-			children.pop_back();
-		childDepth = this->getDepth(data, pos);
-	}
-	
-	// siblings
-	if (childDepth == depth && firstSibling)
-	{
-		bool success = true;
-		while (success && childDepth == depth)
-		{
-			siblings.push_back(ValTree());
-			success = siblings.back().parse(data, pos, false);
-			if (!success)
-				siblings.pop_back();
-			childDepth = this->getDepth(data, pos);
-		}
-		return siblings.size() > 0;
-	}
-	return !this->isNull();
+  int lineEnd = findNewline(data, pos);
+  int nextLineStart = findAfterNewline(data, pos);
+  
+  if (nextLineStart > kMaxFileSize)
+    return false;
+  
+  // pait<int, ValTree> collects a ValTree with its current depth
+  vector<pair<int,ValTree*>> tree;
+  
+  // while we still have lines ...
+  do {
+    // Verify if is a full-line comment
+    int commentStart = findCommentOrNewline(data, pos);
+    int firstCharPos = findNonWhitespace(data, pos);
+    
+    if (commentStart <= firstCharPos) {
+      // Comment here so jump this line
+      pos = nextLineStart;
+    }
+    int depth = this->getDepth(data, pos);
+    
+    // key is first word
+    int startPos = pos + depth;
+    
+    string _key;
+    
+    if (startPos < nextLineStart)
+    {
+      pos = findWhitespace(data, pos + depth + 1);
+      _key = data.substr(startPos, pos < data.size() ? pos - startPos : string::npos);
+    }
+    
+    // val is remainder
+    if (_key.size() > 0)
+    {
+      ValTree* newObj = new ValTree;
+      newObj->key = _key;
+      
+      pos = findNonWhitespace(data, pos);
+      // Trim the remainder if we find a comment
+      int end = findCommentOrNewline(data, pos);
+      
+      if (pos < data.size() && end > pos)
+      {
+        newObj->val = data.substr(pos, end - pos);
+        newObj->setValInt();
+        newObj->setValFloat();
+      }
+      
+      tree.push_back({depth, newObj});
+    }
+    
+    pos = nextLineStart;
+    lineEnd = findNewline(data, pos);
+    nextLineStart = findAfterNewline(data, pos);
+  } while (pos != lineEnd && lineEnd < kMaxFileSize);
+  
+  // Associate each read line to create the actual tree
+  std::stack<pair<int, ValTree*>> cursor;
+  cursor.push({-1,this});
+  
+  for (auto _pair : tree) {
+    auto valDepth = _pair.first;
+    auto val = _pair.second;
+    
+    if (valDepth < 0)
+      continue;
+    
+    do {
+      auto temp = cursor.top();
+      auto depth = temp.first;
+      auto parent = temp.second;
+      
+      if (valDepth > depth) {
+        cursor.push({valDepth, val});
+        break;
+      } else if (valDepth == depth) {
+        cursor.pop();
+        cursor.top().second->children.push_back(*parent);
+        cursor.push({valDepth, val});
+        break;
+      } else {
+        cursor.pop();
+        cursor.top().second->children.push_back(*parent);
+      }
+      
+    } while (cursor.size());
+  }
+  
+  // Append remaining objects to the main tree
+  while (cursor.size() > 1) {
+    auto top = cursor.top();
+    cursor.pop();
+    cursor.top().second->children.push_back(*top.second);
+  }
+  
+  return true;
 }
 
 bool ValTree::parse(const string& filename)
@@ -464,7 +552,7 @@ bool ValTree::save(const string& filename)
 	ofstream file(filename);
 	if (file.is_open())
 	{
-		_log(file, *this, 0);
+		_log(file, *this, -1);
 		file.close();
 		return true;
 	}
@@ -474,7 +562,7 @@ bool ValTree::save(const string& filename)
 void ValTree::log()
 {
 	stringstream ss;
-	_log(ss, *this, 0);
+	_log(ss, *this, -1);
 	cout << ss.str() << endl;
 }
 
