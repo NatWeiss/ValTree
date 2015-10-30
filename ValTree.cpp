@@ -321,11 +321,11 @@ ValTree& ValTree::query(const string& query)
 	if (pos == string::npos)
 		return this->getChild(query);
 	
-	auto key = query.substr(0, pos);
-	auto val = query.substr(pos + 1);
-	if (key.size() > 0)
-		return this->getChild(key).query(val);
-	return this->query(val);
+	auto k = query.substr(0, pos);
+	auto v = query.substr(pos + 1);
+	if (k.size() > 0)
+		return this->getChild(k).query(v);
+	return this->query(v);
 }
 
 const ValTree& ValTree::query(const string& query) const
@@ -334,11 +334,11 @@ const ValTree& ValTree::query(const string& query) const
 	if (pos == string::npos)
 		return this->getChild(query);
 	
-	auto key = query.substr(0, pos);
-	auto val = query.substr(pos + 1);
-	if (key.size() > 0)
-		return this->getChild(key).query(val);
-	return this->query(val);
+	auto k = query.substr(0, pos);
+	auto v = query.substr(pos + 1);
+	if (k.size() > 0)
+		return this->getChild(k).query(v);
+	return this->query(v);
 }
 
 #pragma mark -
