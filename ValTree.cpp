@@ -449,29 +449,29 @@ bool ValTree::parse(const string& data, int& pos, int currentDepth)
 	stack<pair<int, ValTree*>> cursor;
 	cursor.push({-1,this});
 
-	for (auto _pair : tree)
+	for (auto& _pair : tree)
 	{
-		auto valDepth = _pair.first;
+		auto& valDepth = _pair.first;
 		if (valDepth < 0)
 			continue;
-		auto val = _pair.second;
+		auto& v = _pair.second;
 
 		do
 		{
-			auto temp = cursor.top();
-			auto depth = temp.first;
-			auto parent = temp.second;
+			auto& temp = cursor.top();
+			auto& depth = temp.first;
+			auto& parent = temp.second;
 
 			if (valDepth > depth)
 			{
-				cursor.push({valDepth, val});
+				cursor.push({valDepth, v});
 				break;
 			}
 			else if (valDepth == depth)
 			{
 				cursor.pop();
 				cursor.top().second->children.push_back(*parent);
-				cursor.push({valDepth, val});
+				cursor.push({valDepth, v});
 				break;
 			}
 			else

@@ -46,12 +46,27 @@ int main(int argc, const char* argv[])
 	cout << "Modified file saved to: " << filename << endl;
 	
 	// test speed of queries
-	cout << "Running query speed test..." << endl;
-	const int n = 100 * 1000;
-	auto startTime = time();
-	for (int i = 0; i < n; ++i)
-		v.query("key1.key2.key3.key4-1");
-	cout << (int)(n / 1000) << "k queries took " << (int)((time() - startTime) * 1000) << "ms" << endl;
+	{
+		cout << "Running query speed test..." << endl;
+		const int n = 100 * 1000;
+		auto startTime = time();
+		for (int i = 0; i < n; ++i)
+			v.query("key1.key2.key3.key4-1");
+		cout << (int)(n / 1000) << "k queries took " << (int)((time() - startTime) * 1000) << "ms" << endl;
+	}
+
+	// test speed of parse
+	{
+		cout << "Running parse speed test..." << endl;
+		const int n = 10 * 1000;
+		auto startTime = time();
+		for (int i = 0; i < n; ++i)
+		{
+			ValTree test;
+			test.parse(filename);
+		}
+		cout << (int)(n / 1000) << "k parses took " << (int)((time() - startTime) * 1000) << "ms" << endl;
+	}
 
     return 0;
 }
