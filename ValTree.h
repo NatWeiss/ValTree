@@ -74,8 +74,8 @@ class ValTree
 		/// Add a child to the current ValTree.
 		void addChild(const ValTree& v);
 
-		/// Add all necessary branches to val.
-		void addTree(const std::string& query, const std::string& val);
+		/// Add child value and all necessary branches.
+		void addChild(const std::string& query, const std::string& val);
 	
 		/// Parse the given file into this ValTree object.
 		bool parse(const std::string& filename);

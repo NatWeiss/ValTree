@@ -272,8 +272,15 @@ bool ValTree::hasChildren() const
 	return children.size() > 0;
 }
 
-// regarding this code duplication, it is safer (for short methods)
+int ValTree::size() const
+{
+	return (int)children.size();
+}
+
+//
+// regarding the following code duplication, it is safer (for short methods)
 // http://stackoverflow.com/questions/856542/elegant-solution-to-duplicate-const-and-non-const-getters
+//
 
 ValTree& ValTree::getFirstChild()
 {
@@ -301,11 +308,6 @@ const ValTree& ValTree::getChild(const string& k) const
 	return ValTree::null();
 }
 
-int ValTree::size() const
-{
-	return (int)children.size();
-}
-
 ValTree& ValTree::getIndex(int index)
 {
 	if (index >= 0 && index < children.size())
@@ -319,9 +321,6 @@ const ValTree& ValTree::getIndex(int index) const
 		return children[index];
 	return ValTree::null();
 }
-
-// these methods are duplicates for constness
-// (see above)
 
 ValTree& ValTree::query(const string& query)
 {
@@ -349,7 +348,11 @@ const ValTree& ValTree::query(const string& query) const
 	return this->query(v);
 }
 
-void ValTree::addTree(const string& query, const std::string& _val)
+//
+// end duplicate methods
+//
+
+void ValTree::addChild(const string& query, const std::string& _val)
 {
 	auto pos = query.find('.');
 	if (pos == string::npos)
@@ -366,12 +369,12 @@ void ValTree::addTree(const string& query, const std::string& _val)
 		if (child.isNull())
 		{
 			ValTree v(k, string());
-			v.addTree(subquery, _val);
+			v.addChild(subquery, _val);
 			this->addChild(v);
 		}
 		else
 		{
-			child.addTree(subquery, _val);
+			child.addChild(subquery, _val);
 		}
 	}
 }

@@ -41,7 +41,7 @@ int main(int argc, const char* argv[])
 	v.log();
 
 	// store a new value at depth
-	v.addTree("l.m.n.o.p", "q");
+	v.addChild("l.m.n.o.p", "q");
 	cout << "After adding tree 'l.m.n.o.p', new ValTree looks like this:" << endl;
 	v.log();
 	
