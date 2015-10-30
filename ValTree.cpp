@@ -75,29 +75,6 @@ static int findCommentOrNewline(const string& s, int start)
 	return i;
 }
 
-static vector<string>& split(const string &s, char delim, vector<string>& elems)
-{
-	stringstream ss(s);
-	string item;
-	while (getline(ss, item, delim))
-	{
-		elems.push_back(item);
-	}
-	return elems;
-}
-
-static string join(const vector<string> pieces, char delim)
-{
-	stringstream ss;
-	if (pieces.size())
-	{
-		ss << pieces[0];
-		for (int i = 1; i < pieces.size(); i++)
-			ss << delim << pieces[i];
-	}
-	return ss.str();
-}
-
 static void _log(ostream& ss, const ValTree& v, int depth)
 {
 	if (!v.isNull())
@@ -325,54 +302,43 @@ ValTree& ValTree::getIndex(int index)
 {
 	if (index >= 0 && index < children.size())
 		return children[index];
-	return null();
+	return ValTree::null();
 }
 
 const ValTree& ValTree::getIndex(int index) const
 {
 	if (index >= 0 && index < children.size())
 		return children[index];
-	return null();
+	return ValTree::null();
 }
+
+// these methods are duplicates for constness
+// (see above)
 
 ValTree& ValTree::query(const string& query)
 {
-	vector<string> keys;
-	split(query, '.', keys);
-	if (keys.size())
-	{
-		string key = keys[0];
-		if (keys.size() > 1)
-		{
-			keys.erase(find(keys.begin(), keys.end(), key));
-			return this->getChild(key).query(join(keys, '.'));
-		}
-		else
-		{
-			return this->getChild(key);
-		}
-	}
-	return null();
+	auto pos = query.find('.');
+	if (pos == string::npos)
+		return this->getChild(query);
+	
+	auto key = query.substr(0, pos);
+	auto val = query.substr(pos + 1);
+	if (key.size() > 0)
+		return this->getChild(key).query(val);
+	return this->query(val);
 }
 
 const ValTree& ValTree::query(const string& query) const
 {
-	vector<string> keys;
-	split(query, '.', keys);
-	if (keys.size())
-	{
-		string key = keys[0];
-		if (keys.size() > 1)
-		{
-			keys.erase(find(keys.begin(), keys.end(), key));
-			return this->getChild(key).query(join(keys, '.'));
-		}
-		else
-		{
-			return this->getChild(key);
-		}
-	}
-	return null();
+	auto pos = query.find('.');
+	if (pos == string::npos)
+		return this->getChild(query);
+	
+	auto key = query.substr(0, pos);
+	auto val = query.substr(pos + 1);
+	if (key.size() > 0)
+		return this->getChild(key).query(val);
+	return this->query(val);
 }
 
 #pragma mark -
