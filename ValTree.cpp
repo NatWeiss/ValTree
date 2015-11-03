@@ -352,7 +352,7 @@ const ValTree& ValTree::query(const string& query) const
 // end duplicate methods
 //
 
-void ValTree::addChild(const string& query, const std::string& _val)
+void ValTree::addChild(const string& query, const string& _val)
 {
 	auto pos = query.find('.');
 	if (pos == string::npos)
@@ -479,8 +479,6 @@ bool ValTree::parse(const string& data, int& pos, int lastDepth)
 
 bool ValTree::parse(const string& filename)
 {
-	this->clear();
-
 	string data;
 	ifstream file(filename);
 	if (file.is_open())
@@ -499,8 +497,6 @@ bool ValTree::parse(const string& filename)
 
 bool ValTree::parseData(const string& data)
 {
-	this->clear();
-
 	if (data.size() <= 0)
 		return false;
 
