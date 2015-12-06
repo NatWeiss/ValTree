@@ -53,7 +53,7 @@ int main(int argc, const char* argv[])
 	// test speed of queries
 	{
 		cout << "Running query speed test..." << endl;
-		const int n = 100 * 1000;
+		const int n = 1000 * 1000;
 		auto startTime = time();
 		for (int i = 0; i < n; ++i)
 			v.query("key1.key2.key3.key4-1");
