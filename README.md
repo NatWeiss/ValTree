@@ -42,7 +42,7 @@ Data is stored as key value pairs. After the initial tabs or spaces comes the ke
 
 Values can be strings, integers or floats. When parsing, `ValTree` reads the value as a string, then also converts it to `long` and `double` using `strtol` and `strtod`. All three types of data are stored simultaneously as separate data members for quick access.
 
-Each `ValTree` is a self-contained recursive class containing siblings and children. Children are `ValTree` objects stored at one level deeper than current. Siblings are `ValTree` objects stored at the same depth level. Parsing a `ValTree` puts all siblings inside the first `ValTree` object for convenience.
+Each `ValTree` is a self-contained recursive class containing an array of children. Children are `ValTree` objects stored at one level deeper than current. Children are returned by reference and guaranteed to be non-null (if a child is not found then an empty static object is returned via `ValTree::null()`).
 
 
 Example Code
@@ -68,10 +68,12 @@ Here is some example code to load a ValTree, retrieve a value, store a new value
 	// save the tree to a new file
 	v.save("Example-modified.txt");
 
+
 To Do
 -----
 
-1. Add the ability to get siblings as a vector.
+1. Add the ability to get children as a vector.
+
 
 License
 -------
