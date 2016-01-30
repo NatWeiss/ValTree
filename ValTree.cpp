@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <stack>
+#include <string.h>
 
 const int   kMaxFileSize      = 8 * 1024 * 1024;
 const char* kCommentStartTag  = "//";
@@ -25,7 +26,7 @@ static bool isWhitespace(char c)
 static int findWhitespace(const string& s, int start)
 {
 	int i = start;
-	for (; i < s.size() && !isWhitespace(s[i]); i++)
+	for (; i < static_cast<int>(s.size()) && !isWhitespace(s[i]); i++)
 		;
 	return i;
 }
@@ -33,7 +34,7 @@ static int findWhitespace(const string& s, int start)
 static int findNonWhitespace(const string& s, int start)
 {
 	int i = start;
-	for (; i < s.size() && isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
+	for (; i < static_cast<int>(s.size()) && isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
 		;
 	return i;
 }
@@ -41,7 +42,7 @@ static int findNonWhitespace(const string& s, int start)
 static int findNewline(const string& s, int start)
 {
 	int i = start;
-	for (; i < s.size() && s[i] != '\n' && s[i] != '\r'; i++)
+	for (; i < static_cast<int>(s.size()) && s[i] != '\n' && s[i] != '\r'; i++)
 		;
 	return i;
 }
@@ -49,7 +50,7 @@ static int findNewline(const string& s, int start)
 static int findAfterNewline(const string& s, int start)
 {
 	int i = findNewline(s, start);
-	for (; i < s.size() && (s[i] == '\n' || s[i] == '\r'); i++)
+	for (; i < static_cast<int>(s.size()) && (s[i] == '\n' || s[i] == '\r'); i++)
 		;
 	return i;
 }
@@ -77,7 +78,7 @@ static int findCommentOrNewline(const string& s, int start)
 
 static int getDepth(const string& data, int pos)
 {
-	for (int i = pos; i < data.size(); i++)
+	for (int i = pos; i < static_cast<int>(data.size()); i++)
 		if (!isWhitespace(data[i]))
 			return i - pos;
 	return -1;
@@ -310,14 +311,14 @@ const ValTree& ValTree::getChild(const string& k) const
 
 ValTree& ValTree::getIndex(int index)
 {
-	if (index >= 0 && index < children.size())
+	if (index >= 0 && index < static_cast<int>(children.size()))
 		return children[index];
 	return ValTree::null();
 }
 
 const ValTree& ValTree::getIndex(int index) const
 {
-	if (index >= 0 && index < children.size())
+	if (index >= 0 && index < static_cast<int>(children.size()))
 		return children[index];
 	return ValTree::null();
 }
@@ -439,7 +440,7 @@ bool ValTree::parse(const string& data, int& pos, int lastDepth)
 		if (startPos < nextLineStart)
 		{
 			pos = findWhitespace(data, pos + depth + 1);
-			key = data.substr(startPos, pos < data.size() ? pos - startPos : string::npos);
+			key = data.substr(startPos, pos < static_cast<int>(data.size()) ? pos - startPos : string::npos);
 		}
 
 		// val is remainder
@@ -447,7 +448,7 @@ bool ValTree::parse(const string& data, int& pos, int lastDepth)
 		{
 			pos = findNonWhitespace(data, pos);
 			int end = findCommentOrNewline(data, pos);
-			if (pos < data.size() && end > pos)
+			if (pos < static_cast<int>(data.size()) && end > pos)
 			{
 				val = data.substr(pos, end - pos);
 				this->setValInt();
