@@ -25,32 +25,32 @@ static bool isWhitespace(char c)
 
 static int findWhitespace(const string& s, int start)
 {
-	int i = start;
-	for (; i < static_cast<int>(s.size()) && !isWhitespace(s[i]); i++)
+	unsigned i = start;
+	for (; i < s.size() && !isWhitespace(s[i]); i++)
 		;
 	return i;
 }
 
 static int findNonWhitespace(const string& s, int start)
 {
-	int i = start;
-	for (; i < static_cast<int>(s.size()) && isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
+	unsigned i = start;
+	for (; i < s.size() && isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
 		;
 	return i;
 }
 
 static int findNewline(const string& s, int start)
 {
-	int i = start;
-	for (; i < static_cast<int>(s.size()) && s[i] != '\n' && s[i] != '\r'; i++)
+	unsigned i = start;
+	for (; i < s.size() && s[i] != '\n' && s[i] != '\r'; i++)
 		;
 	return i;
 }
 
 static int findAfterNewline(const string& s, int start)
 {
-	int i = findNewline(s, start);
-	for (; i < static_cast<int>(s.size()) && (s[i] == '\n' || s[i] == '\r'); i++)
+	unsigned i = findNewline(s, start);
+	for (; i < s.size() && (s[i] == '\n' || s[i] == '\r'); i++)
 		;
 	return i;
 }
@@ -78,7 +78,7 @@ static int findCommentOrNewline(const string& s, int start)
 
 static int getDepth(const string& data, int pos)
 {
-	for (int i = pos; i < static_cast<int>(data.size()); i++)
+	for (unsigned i = pos; i < data.size(); i++)
 		if (!isWhitespace(data[i]))
 			return i - pos;
 	return -1;
@@ -311,16 +311,14 @@ const ValTree& ValTree::getChild(const string& k) const
 
 ValTree& ValTree::getIndex(int index)
 {
-	if (index >= 0 && index < static_cast<int>(children.size()))
-		return children[index];
-	return ValTree::null();
+	unsigned i = index;
+	return (i < children.size() ? children[i] : ValTree::null());
 }
 
 const ValTree& ValTree::getIndex(int index) const
 {
-	if (index >= 0 && index < static_cast<int>(children.size()))
-		return children[index];
-	return ValTree::null();
+	unsigned i = index;
+	return (i < children.size() ? children[i] : ValTree::null());
 }
 
 ValTree& ValTree::query(const string& query)
@@ -435,12 +433,14 @@ bool ValTree::parse(const string& data, int& pos, int lastDepth)
 	int depth = getDepth(data, pos);
 	if (depth == lastDepth)
 	{
+		const long dataSize = data.size();
+
 		// key is first word
 		int startPos = pos + depth;
 		if (startPos < nextLineStart)
 		{
 			pos = findWhitespace(data, pos + depth + 1);
-			key = data.substr(startPos, pos < static_cast<int>(data.size()) ? pos - startPos : string::npos);
+			key = data.substr(startPos, pos < dataSize ? pos - startPos : string::npos);
 		}
 
 		// val is remainder
@@ -448,7 +448,7 @@ bool ValTree::parse(const string& data, int& pos, int lastDepth)
 		{
 			pos = findNonWhitespace(data, pos);
 			int end = findCommentOrNewline(data, pos);
-			if (pos < static_cast<int>(data.size()) && end > pos)
+			if (pos < dataSize && end > pos)
 			{
 				val = data.substr(pos, end - pos);
 				this->setValInt();
