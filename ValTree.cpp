@@ -419,7 +419,7 @@ ValTree::Iterator ValTree::end() const
 bool ValTree::parse(const string& data, int& pos, int lastDepth)
 {
 	int nextLineStart = findAfterNewline(data, pos);
-	if (nextLineStart > kMaxFileSize)
+	if (nextLineStart > kMaxFileSize || pos == nextLineStart)
 		return false;
 
 	// comment here so jump this line

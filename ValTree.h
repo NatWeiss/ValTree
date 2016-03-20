@@ -49,10 +49,10 @@ class ValTree
 		bool operator<(const ValTree& rhs);
 		bool operator>(const ValTree& rhs);
 	
-		/// Return the size of this ValTree (0 if null, 1 + number of siblings otherwise).
+		/// Return the size of this ValTree (0 if null, 1 + number of children otherwise).
 		int size() const;
 	
-		/// Return a sibling given index (0 is this ValTree, 1 is the first sibling).
+		/// Return a sibling given index (0 is this ValTree, 1 is the first child).
 		ValTree& getIndex(int index);
 		const ValTree& getIndex(int index) const;
 
