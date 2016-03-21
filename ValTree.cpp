@@ -146,7 +146,7 @@ bool ValTree::isNull() const
 
 void ValTree::setValInt()
 {
-	valInt = strtol(val.c_str(), nullptr, 10);
+	valInt = strtoll(val.c_str(), nullptr, 10);
 }
 
 void ValTree::setValFloat()
