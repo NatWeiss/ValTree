@@ -8,6 +8,7 @@
 #include <sstream>
 #include <stack>
 #include <string.h>
+#include <stdlib.h>
 
 const int   kMaxFileSize      = 8 * 1024 * 1024;
 const char* kCommentStartTag  = "//";
@@ -18,7 +19,7 @@ using namespace std;
 // static helper functions
 //
 
-static bool isWhitespace(char c)
+static bool _isWhitespace(char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
 }
@@ -26,7 +27,7 @@ static bool isWhitespace(char c)
 static int findWhitespace(const string& s, int start)
 {
 	unsigned i = start;
-	for (; i < s.size() && !isWhitespace(s[i]); i++)
+	for (; i < s.size() && !_isWhitespace(s[i]); i++)
 		;
 	return i;
 }
@@ -34,7 +35,7 @@ static int findWhitespace(const string& s, int start)
 static int findNonWhitespace(const string& s, int start)
 {
 	unsigned i = start;
-	for (; i < s.size() && isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
+	for (; i < s.size() && _isWhitespace(s[i]) && s[i] != '\n' && s[i] != '\r'; i++)
 		;
 	return i;
 }
@@ -79,7 +80,7 @@ static int findCommentOrNewline(const string& s, int start)
 static int getDepth(const string& data, int pos)
 {
 	for (unsigned i = pos; i < data.size(); i++)
-		if (!isWhitespace(data[i]))
+		if (!_isWhitespace(data[i]))
 			return i - pos;
 	return -1;
 }
