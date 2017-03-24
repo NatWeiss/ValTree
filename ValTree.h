@@ -33,6 +33,9 @@ class ValTree
 		const std::string& getStr() const;
 		long getInt() const;
 		double getFloat() const;
+		const std::vector<std::string> getStrs(char delim = ',') const;
+		std::vector<long> getInts(char delim = ',') const;
+		std::vector<double> getFloats(char delim = ',') const;
 	
 		/// Set the key and value.
 		void set(const std::string& key, const std::string& val);

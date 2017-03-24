@@ -264,6 +264,64 @@ double ValTree::getFloat() const
 	return valFloat;
 }
 
+const vector<string> ValTree::getStrs(char delim) const
+{
+	vector<string> v;
+	if (val.size() > 0)
+	{
+		string s;
+		stringstream ss(val);
+		while(std::getline(ss, s, delim))
+			if (!s.empty())
+				v.push_back(s);
+	}
+	return v;
+}
+
+vector<long> ValTree::getInts(char delim) const
+{
+	vector<long> v;
+	if (!this->isNull())
+	{
+		size_t pos = 0, lastPos = 0;
+		bool good = false;
+		do
+		{
+			pos = val.find(delim, pos);
+			good = (pos != string::npos);
+			if (good || lastPos > 0)
+				v.push_back(strtol(&val[lastPos], nullptr, 10));
+			if (good)
+				lastPos = ++pos;
+		} while (good);
+		if (v.empty())
+			v.push_back(valInt);
+	}
+	return v;
+}
+
+vector<double> ValTree::getFloats(char delim) const
+{
+	vector<double> v;
+	if (!this->isNull())
+	{
+		size_t pos = 0, lastPos = 0;
+		bool good = false;
+		do
+		{
+			pos = val.find(delim, pos);
+			good = (pos != string::npos);
+			if (good || lastPos > 0)
+				v.push_back(strtof(&val[lastPos], nullptr));
+			if (good)
+				lastPos = ++pos;
+		} while (good);
+		if (v.empty())
+			v.push_back(valFloat);
+	}
+	return v;
+}
+
 void ValTree::addChild(const ValTree& v)
 {
 	children.push_back(v);
