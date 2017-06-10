@@ -79,6 +79,9 @@ class ValTree
 
 		/// Add child value and all necessary branches.
 		void addChild(const std::string& query, const std::string& val);
+
+		/// Remove any children with the given key.
+		void removeChild(const std::string& key);
 	
 		/// Parse the given file into this ValTree object.
 		bool parse(const std::string& filename);
@@ -87,10 +90,13 @@ class ValTree
 		bool parseData(const std::string& data);
 	
 		/// Save this ValTree object into the given file.
-		bool save(const std::string& filename);
+		bool save(const std::string& filename) const;
+	
+		/// Write this ValTree object into the given string buffer.
+		void write(std::string& buffer) const;
 	
 		/// Log out this ValTree to cout / stdout.
-		void log();
+		void log() const;
 
 		/// Used to iterate over the ValTree's siblings, for example: `for (auto& sibling : tree) {}`
 		class Iterator

@@ -1,5 +1,14 @@
 //
-// ValTree
+// ValTree: load data from minimal text files
+//
+// ValTree is a file format for storing key value pairs
+// in a minimal textual hierarchy and a C++ class to read
+// and write those files. Data is queried and returned
+// as guaranteed references. A query miss even returns a 
+// a reference to a static blank object.
+//
+// ValTree is on GitHub:
+// https://github.com/natweiss/valtree
 //
 
 #include "ValTree.h"
@@ -134,10 +143,13 @@ ValTree::~ValTree()
 void ValTree::clear()
 {
 	key.clear();
+	key.shrink_to_fit();
 	val.clear();
+	val.shrink_to_fit();
 	valInt = 0;
 	valFloat = 0.0;
 	children.clear();
+	children.shrink_to_fit();
 }
 
 bool ValTree::isNull() const
@@ -325,6 +337,20 @@ vector<double> ValTree::getFloats(char delim) const
 void ValTree::addChild(const ValTree& v)
 {
 	children.push_back(v);
+}
+
+void ValTree::removeChild(const string& removeKey)
+{
+	for (auto it = children.begin(); it != children.end();)
+	{
+		if (it->key == removeKey)
+		{
+			it->clear();
+			it = children.erase(it);
+		}
+		else
+			++it;
+	}
 }
 
 bool ValTree::hasChildren() const
@@ -567,7 +593,7 @@ bool ValTree::parseData(const string& data)
 	return true;
 }
 
-bool ValTree::save(const string& filename)
+bool ValTree::save(const string& filename) const
 {
 	ofstream file(filename);
 	if (file.is_open())
@@ -579,7 +605,14 @@ bool ValTree::save(const string& filename)
 	return false;
 }
 
-void ValTree::log()
+void ValTree::write(string& buffer) const
+{
+	ostringstream ss;
+	_log(ss, *this, -1);
+	buffer = ss.str();
+}
+
+void ValTree::log() const
 {
 	stringstream ss;
 	_log(ss, *this, -1);
