@@ -65,27 +65,6 @@ static int findAfterNewline(const string& s, int start)
 	return i;
 }
 
-static int findCommentOrNewline(const string& s, int start)
-{
-	int i = start;
-	int nl = findNewline(s, start);
-	int commentIndex = 0;
-	static const int commentTagSize = (int)strlen(kCommentStartTag);
-
-	while (i < nl)
-	{
-		if (s[i++] == kCommentStartTag[commentIndex++])
-		{
-			if (commentIndex == commentTagSize)
-				return i - commentTagSize;
-		}
-		else
-			commentIndex = 0;
-	}
-
-	return i;
-}
-
 static int getDepth(const string& data, int pos)
 {
 	for (unsigned i = pos; i < data.size(); i++)
@@ -508,7 +487,7 @@ bool ValTree::parse(const string& data, int& pos, int lastDepth)
 		return false;
 
 	// comment here so jump this line
-	if (findCommentOrNewline(data, pos) <= findNonWhitespace(data, pos))
+	if (findNewline(data, pos) <= findNonWhitespace(data, pos))
 	{
 		pos = nextLineStart;
 		return this->parse(data, pos, lastDepth);
@@ -532,7 +511,7 @@ bool ValTree::parse(const string& data, int& pos, int lastDepth)
 		if (key.size() > 0)
 		{
 			pos = findNonWhitespace(data, pos);
-			int end = findCommentOrNewline(data, pos);
+			int end = findNewline(data, pos);
 			if (pos < dataSize && end > pos)
 			{
 				val = data.substr(pos, end - pos);
